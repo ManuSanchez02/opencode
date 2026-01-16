@@ -1307,7 +1307,7 @@ function TextPart(props: { last: boolean; part: TextPart; message: AssistantMess
   return (
     <Show when={props.part.text.trim()}>
       <box id={"text-" + props.part.id} paddingLeft={3} marginTop={1} flexShrink={0}>
-        <hooked_code
+        <hookable_code
           filetype="markdown"
           drawUnstyledText={false}
           streaming={true}

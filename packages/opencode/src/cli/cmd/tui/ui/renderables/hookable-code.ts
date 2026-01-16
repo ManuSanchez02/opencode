@@ -7,7 +7,7 @@ import { CodeRenderable, type OptimizedBuffer } from "@opentui/core"
  * these hooks, unlike the base Renderable.render(). This class adds the missing
  * hook calls to enable post-processing of rendered code content.
  */
-export class HookedCodeRenderable extends CodeRenderable {
+export class HookableCodeRenderable extends CodeRenderable {
   override render(buffer: OptimizedBuffer, deltaTime: number) {
     if (!this.visible) return
 

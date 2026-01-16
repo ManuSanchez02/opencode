@@ -1,7 +1,7 @@
 import { extend } from "@opentui/solid"
-import { HookedCodeRenderable } from "./hooked-code"
+import { HookableCodeRenderable } from "./hookable-code"
 
-export { HookedCodeRenderable }
+export { HookableCodeRenderable }
 
 export { highlightHexColors } from "./buffer/hex-highlight"
 
@@ -16,12 +16,12 @@ export function registerRenderables() {
   registered = true
 
   extend({
-    hooked_code: HookedCodeRenderable,
+    hookable_code: HookableCodeRenderable,
   })
 }
 
 declare module "@opentui/solid" {
   interface OpenTUIComponents {
-    hooked_code: typeof HookedCodeRenderable
+    hookable_code: typeof HookableCodeRenderable
   }
 }

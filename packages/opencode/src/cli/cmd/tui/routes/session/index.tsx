@@ -25,8 +25,6 @@ import {
   type ScrollAcceleration,
   TextAttributes,
   RGBA,
-  type OptimizedBuffer,
-  type Renderable,
 } from "@opentui/core"
 import { Prompt, type PromptRef } from "@tui/component/prompt"
 import type { AssistantMessage, Part, ToolPart, UserMessage, TextPart, ReasoningPart } from "@opencode-ai/sdk/v2"
@@ -76,8 +74,9 @@ import { PermissionPrompt } from "./permission"
 import { QuestionPrompt } from "./question"
 import { DialogExportOptions } from "../../ui/dialog-export-options"
 import { formatTranscript } from "../../util/transcript"
-import "../../ui/hexcode"
+import { registerRenderables, highlightHexColors } from "../../ui/renderables"
 
+registerRenderables()
 addDefaultParsers(parsers.parsers)
 
 class CustomSpeedScroll implements ScrollAcceleration {
@@ -1305,58 +1304,10 @@ function TextPart(props: { last: boolean; part: TextPart; message: AssistantMess
   const ctx = use()
   const { theme, syntax } = useTheme()
 
-  const highlightHexColors = function (this: Renderable, buffer: OptimizedBuffer) {
-    const width = buffer.width
-    const height = buffer.height
-
-    for (let y = 0; y < height; y++) {
-      let row = ""
-      for (let x = 0; x < width; x++) {
-        const charCode = buffer.buffers.char[y * width + x]
-        row += charCode ? String.fromCodePoint(charCode) : " "
-      }
-
-      const pattern = /#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})\b/g
-      let match
-
-      while ((match = pattern.exec(row)) !== null) {
-        const hexColor = match[0]
-        let hex = hexColor.slice(1)
-
-        if (hex.length === 3) {
-          hex = hex
-            .split("")
-            .map((c) => c + c)
-            .join("")
-        }
-
-        const bgHex = hex.slice(0, 6)
-
-        const r = parseInt(bgHex.slice(0, 2), 16) / 255
-        const g = parseInt(bgHex.slice(2, 4), 16) / 255
-        const b = parseInt(bgHex.slice(4, 6), 16) / 255
-
-        const luminance = 0.299 * r + 0.587 * g + 0.114 * b
-        const textColor = luminance > 0.5 ? 0 : 1
-
-        const fgColor = RGBA.fromValues(textColor, textColor, textColor, 1)
-        const bgColor = RGBA.fromValues(r, g, b, 1)
-        for (let i = 0; i < hexColor.length; i++) {
-          const x = match.index + i
-          if (x >= width) continue
-
-          const charCode = buffer.buffers.char[y * width + x]
-          const char = charCode ? String.fromCodePoint(charCode) : " "
-          buffer.setCell(x, y, char, fgColor, bgColor)
-        }
-      }
-    }
-  }
-
   return (
     <Show when={props.part.text.trim()}>
       <box id={"text-" + props.part.id} paddingLeft={3} marginTop={1} flexShrink={0}>
-        <hexcode
+        <hooked_code
           filetype="markdown"
           drawUnstyledText={false}
           streaming={true}

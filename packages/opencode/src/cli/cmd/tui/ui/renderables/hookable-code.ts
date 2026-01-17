@@ -10,8 +10,6 @@ import { extend } from "@opentui/solid"
  */
 export class HookableCodeRenderable extends CodeRenderable {
   override render(buffer: OptimizedBuffer, deltaTime: number) {
-    if (!this.visible) return
-
     this.renderBefore?.call(this, buffer, deltaTime)
     super.render(buffer, deltaTime)
     this.renderAfter?.call(this, buffer, deltaTime)

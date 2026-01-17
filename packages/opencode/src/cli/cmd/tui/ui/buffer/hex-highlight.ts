@@ -2,13 +2,15 @@ import { RGBA, type OptimizedBuffer } from "@opentui/core"
 
 const HEX_PATTERN = /#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})\b/g
 
-function parseHex(hex: string): { r: number; g: number; b: number } {
+function parseHex(hex: string): { r: number; g: number; b: number; a: number } {
   const normalized = hex.length === 3 ? hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2] : hex.slice(0, 6)
+  const a = hex.length === 8 ? parseInt(hex.slice(6, 8), 16) / 255 : 1
 
   return {
     r: parseInt(normalized.slice(0, 2), 16) / 255,
     g: parseInt(normalized.slice(2, 4), 16) / 255,
     b: parseInt(normalized.slice(4, 6), 16) / 255,
+    a,
   }
 }
 
@@ -42,18 +44,18 @@ export function highlightHexColors(buffer: OptimizedBuffer): void {
 
     for (const match of row.matchAll(HEX_PATTERN)) {
       const color = match[0]
-      const { r, g, b } = parseHex(color.slice(1))
+      const { r, g, b, a } = parseHex(color.slice(1))
       const text = luminance(r, g, b) > 0.5 ? 0 : 1
 
       const fg = RGBA.fromValues(text, text, text, 1)
-      const bg = RGBA.fromValues(r, g, b, 1)
+      const bg = RGBA.fromValues(r, g, b, a)
 
       for (let i = 0; i < color.length; i++) {
-        const x = match.index + i
+        const x = match.index! + i
         if (x >= width) break
 
         const code = buffer.buffers.char[y * width + x]
-        buffer.setCell(x, y, isValidCodePoint(code) ? String.fromCodePoint(code) : " ", fg, bg)
+        buffer.setCellWithAlphaBlending(x, y, isValidCodePoint(code) ? String.fromCodePoint(code) : " ", fg, bg)
       }
     }
   }

@@ -74,9 +74,9 @@ import { PermissionPrompt } from "./permission"
 import { QuestionPrompt } from "./question"
 import { DialogExportOptions } from "../../ui/dialog-export-options"
 import { formatTranscript } from "../../util/transcript"
-import { registerRenderables, highlightHexColors } from "../../ui/renderables"
+import "../../ui/renderables/hookable-code"
+import { highlightHexColors } from "../../ui/buffer/hex-highlight"
 
-registerRenderables()
 addDefaultParsers(parsers.parsers)
 
 class CustomSpeedScroll implements ScrollAcceleration {

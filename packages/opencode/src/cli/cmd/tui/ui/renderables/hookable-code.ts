@@ -1,4 +1,5 @@
 import { CodeRenderable, type OptimizedBuffer } from "@opentui/core"
+import { extend } from "@opentui/solid"
 
 /**
  * Extends CodeRenderable to properly call renderBefore/renderAfter hooks.
@@ -14,5 +15,13 @@ export class HookableCodeRenderable extends CodeRenderable {
     this.renderBefore?.call(this, buffer, deltaTime)
     super.render(buffer, deltaTime)
     this.renderAfter?.call(this, buffer, deltaTime)
+  }
+}
+
+extend({ hookable_code: HookableCodeRenderable })
+
+declare module "@opentui/solid" {
+  interface OpenTUIComponents {
+    hookable_code: typeof HookableCodeRenderable
   }
 }

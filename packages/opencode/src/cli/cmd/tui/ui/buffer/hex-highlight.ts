@@ -24,12 +24,12 @@ function isValidCodePoint(code: number): boolean {
 
 function readRow(buffer: OptimizedBuffer, y: number): string {
   const { width } = buffer
-  let row = ""
+  const chars: string[] = []
   for (let x = 0; x < width; x++) {
     const code = buffer.buffers.char[y * width + x]
-    row += isValidCodePoint(code) ? String.fromCodePoint(code) : " "
+    chars.push(isValidCodePoint(code) ? String.fromCodePoint(code) : " ")
   }
-  return row
+  return chars.join("")
 }
 
 /**

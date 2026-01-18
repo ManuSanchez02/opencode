@@ -22,14 +22,22 @@ function isValidCodePoint(code: number): boolean {
   return code > 0 && code <= 0x10ffff
 }
 
-function readRow(buffer: OptimizedBuffer, y: number): string {
+function readRowWithMapping(buffer: OptimizedBuffer, y: number): { row: string; indexMap: number[] } {
   const { width } = buffer
   const chars: string[] = []
+  const indexMap: number[] = [] // maps string index (UTF-16) to buffer column
+
   for (let x = 0; x < width; x++) {
     const code = buffer.buffers.char[y * width + x]
-    chars.push(isValidCodePoint(code) ? String.fromCodePoint(code) : " ")
+    const char = isValidCodePoint(code) ? String.fromCodePoint(code) : " "
+
+    for (let i = 0; i < char.length; i++) {
+      indexMap.push(x)
+    }
+
+    chars.push(char)
   }
-  return chars.join("")
+  return { row: chars.join(""), indexMap }
 }
 
 /**
@@ -40,7 +48,7 @@ export function highlightHexColors(buffer: OptimizedBuffer): void {
   const { width, height } = buffer
 
   for (let y = 0; y < height; y++) {
-    const row = readRow(buffer, y)
+    const { row, indexMap } = readRowWithMapping(buffer, y)
 
     for (const match of row.matchAll(HEX_PATTERN)) {
       const color = match[0]
@@ -50,8 +58,10 @@ export function highlightHexColors(buffer: OptimizedBuffer): void {
       const fg = RGBA.fromValues(text, text, text, 1)
       const bg = RGBA.fromValues(r, g, b, a)
 
+      // Map string index to buffer column (handles multi-byte chars like emoji)
+      const startCol = indexMap[match.index!]
       for (let i = 0; i < color.length; i++) {
-        const x = match.index! + i
+        const x = startCol + i
         if (x >= width) break
 
         const code = buffer.buffers.char[y * width + x]
